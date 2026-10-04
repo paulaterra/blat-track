@@ -371,8 +371,61 @@ section[data-screen="notificacions"] .notification-reminder{
   background-image:none!important;
 }
 
-
-/* Ajustos Paula */
+/* Ajustos Paula · hero net i definitiu */
 .avatar-button{display:none!important}
 .topbar{justify-content:flex-start}
-.hero-card:before,.hero-card:after{display:none!important}
+.hero-card:before,.hero-card:after{display:none!important;content:none!important}
+
+/* Escriptori: columna prou ampla perquè la foto no envaeixi el marge dret */
+@media (min-width:768px){
+  .hero-card{
+    grid-template-columns:minmax(0,1fr) 190px!important;
+    column-gap:24px!important;
+    padding:26px 36px 26px 26px!important;
+  }
+  .hero-visual{
+    width:170px!important;
+    justify-self:end!important;
+    margin:0!important;
+  }
+  .hero-avatar-ring{
+    width:170px!important;
+    height:200px!important;
+    border:3px solid rgba(255,255,255,.82)!important;
+    border-radius:36px!important;
+    box-sizing:border-box!important;
+  }
+}
+
+/* Mòbil: foto més gran i 30px reals entre foto i final de la targeta */
+@media (max-width:767px){
+  .hero-card{
+    grid-template-columns:minmax(0,1fr) 124px!important;
+    column-gap:16px!important;
+    padding:20px 30px 20px 20px!important;
+    min-height:232px!important;
+  }
+  .hero-visual{
+    width:124px!important;
+    justify-self:end!important;
+    margin:0!important;
+    gap:8px!important;
+  }
+  .hero-avatar-ring{
+    width:124px!important;
+    height:150px!important;
+    border:2px solid rgba(255,255,255,.82)!important;
+    border-radius:28px!important;
+    box-sizing:border-box!important;
+  }
+}
+
+@media (max-width:390px){
+  .hero-card{
+    grid-template-columns:minmax(0,1fr) 116px!important;
+    column-gap:13px!important;
+    padding-right:26px!important;
+  }
+  .hero-visual{width:116px!important}
+  .hero-avatar-ring{width:116px!important;height:142px!important}
+}
