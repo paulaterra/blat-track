@@ -55,12 +55,14 @@ const seed={
     {id:'j2',date:'2026-07-03',type:'Salut',title:'Pell irritada',notes:'Zona irritada. Revisar si és només ferida o si sembla infectat abans d’aplicar la pauta corresponent.',attachments:[]}
   ],
   documents:[],
-  notifications:{emailEnabled:false,email:'',ntfyEnabled:false,ntfyServer:'https://ntfy.sh',ntfyTopic:'',lastSync:''},
+  notifications:{emailEnabled:true,email:'paulaterrabosch@gmail.com',ntfyEnabled:true,ntfyServer:'https://ntfy.sh',ntfyTopic:'blat-paula-7f9k2x',lastSync:''},
   deviceId:'',
   notified:{}
 };
 
 let state=loadState();
+let cloudReady=false;
+let cloudSaveTimer=null;
 let currentScreen='inici';
 let trackingFilter='Tots';
 let documentFilter='Tots';
@@ -74,7 +76,16 @@ function loadState(){
     const raw=localStorage.getItem(STORAGE_KEY)||localStorage.getItem(OLD_STORAGE_KEY)||localStorage.getItem(LEGACY_STORAGE_KEY);
     if(!raw){const fresh=clone(seed);fresh.deviceId=(crypto.randomUUID?crypto.randomUUID():uid('device'));return fresh;}
     const saved=JSON.parse(raw);
-    const merged={...seed,...saved,profile:{...seed.profile,...saved.profile},notifications:{...seed.notifications,...saved.notifications}};
+    const savedNotifications=saved.notifications||{};
+    const merged={...seed,...saved,profile:{...seed.profile,...saved.profile},notifications:{
+      ...seed.notifications,
+      ...savedNotifications,
+      email:savedNotifications.email||seed.notifications.email,
+      ntfyServer:savedNotifications.ntfyServer||seed.notifications.ntfyServer,
+      ntfyTopic:savedNotifications.ntfyTopic||seed.notifications.ntfyTopic,
+      emailEnabled:typeof savedNotifications.emailEnabled==='boolean'?savedNotifications.emailEnabled:seed.notifications.emailEnabled,
+      ntfyEnabled:typeof savedNotifications.ntfyEnabled==='boolean'?savedNotifications.ntfyEnabled:seed.notifications.ntfyEnabled
+    }};
     const guidelineTones=['peach','mint','lilac','sky','yellow','rose'];
     merged.guidelines=(merged.guidelines||[]).map((g,i)=>({...g,tone:g.tone||guidelineTones[i%guidelineTones.length],attachments:Array.isArray(g.attachments)?g.attachments:[]}));
     merged.journal=(merged.journal||[]).map(j=>({...j,attachments:Array.isArray(j.attachments)?j.attachments:[]}));
@@ -83,7 +94,51 @@ function loadState(){
     return merged;
   }catch{return clone(seed)}
 }
-function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function dataConfig(){return window.BLAT_CONFIG||{dataFunctionUrl:'',supabaseAnonKey:'',appId:''}}
+function cloudConfigured(){const c=dataConfig();return !!(c.dataFunctionUrl&&c.appId)}
+async function dataRequest(payload){
+  const cfg=dataConfig();if(!cfg.dataFunctionUrl)throw new Error('Backend de dades no configurat');
+  const headers={'Content-Type':'application/json'};
+  if(cfg.supabaseAnonKey){headers.apikey=cfg.supabaseAnonKey;headers.Authorization=`Bearer ${cfg.supabaseAnonKey}`}
+  const res=await fetch(cfg.dataFunctionUrl,{method:'POST',headers,body:JSON.stringify({...payload,appId:cfg.appId})});
+  let data={};try{data=await res.json()}catch{}
+  if(!res.ok)throw new Error(data.error||`Error ${res.status}`);
+  return data;
+}
+async function saveStateCloud(){if(!cloudConfigured())return false;await dataRequest({action:'save',data:state});return true}
+function scheduleCloudSave(){if(!cloudReady||!cloudConfigured())return;clearTimeout(cloudSaveTimer);cloudSaveTimer=setTimeout(()=>saveStateCloud().catch(err=>{console.error('Cloud save',err);toast('No s’ha pogut desar a Supabase')}),250)}
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));scheduleCloudSave()}
+async function migrateLocalFilesToCloud(){
+  if(!cloudConfigured())return;
+  const keys=new Set(['profile-photo']);
+  (state.guidelines||[]).forEach(g=>(g.attachments||[]).forEach(a=>a?.id&&keys.add(a.id)));
+  (state.journal||[]).forEach(j=>(j.attachments||[]).forEach(a=>a?.id&&keys.add(a.id)));
+  (state.documents||[]).forEach(d=>d?.id&&keys.add(d.id));
+  for(const key of keys){
+    const blob=await getLocalBlob(key).catch(()=>null);
+    if(blob){try{await putBlob(key,blob)}catch(err){console.error('File migration',key,err)}}
+  }
+}
+async function bootstrapCloudState(){
+  if(!cloudConfigured())return;
+  try{
+    const remote=await dataRequest({action:'load'});
+    if(remote.found&&remote.data){
+      state={...clone(seed),...remote.data,profile:{...seed.profile,...remote.data.profile},notifications:{...seed.notifications,...remote.data.notifications}};
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+      cloudReady=true;
+      renderAll();
+      await migrateLocalFilesToCloud();
+      await syncNotificationBackend({silent:true});
+    }else{
+      cloudReady=true;
+      await saveStateCloud();
+      await migrateLocalFilesToCloud();
+      await syncNotificationBackend({silent:true});
+    }
+  }catch(err){console.error('Cloud bootstrap',err);cloudReady=true;toast('Supabase no ha carregat; treballant amb la còpia local')}
+}
+
 function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function lines(s=''){return esc(s).split(/\n+/).filter(Boolean)}
 function formatDate(iso){if(!iso)return'Sense data';return new Intl.DateTimeFormat('ca-ES',{day:'numeric',month:'short',year:'numeric'}).format(new Date(iso.slice(0,10)+'T12:00:00'))}
@@ -225,9 +280,25 @@ function openJournal(item=null){const dlg=document.getElementById('journalDialog
 function markDone(id){const item=state.tracking.find(x=>x.id===id);if(!item)return;const doneDate=todayISO();item.lastDate=doneDate;if(item.intervalValue)item.nextDate=addInterval(doneDate,item.intervalValue,item.intervalUnit);state.journal.push({id:uid('j'),date:doneDate,type:'Medicació',title:`${item.name||'Seguiment'} · fet`,notes:`${item.category||'Altres'}${item.subtype?` · ${item.subtype}`:''}. Proper recordatori: ${item.nextDate?formatDate(item.nextDate):'sense data'}.`,attachments:[]});saveState();syncNotificationBackend({silent:true});renderAll();toast(`${item.name||'Seguiment'} marcat com a fet`)}
 
 async function openDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(DB_STORE))db.createObjectStore(DB_STORE)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
-async function putBlob(key,blob){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(blob,key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
-async function getBlob(key){const db=await openDB();return new Promise((resolve,reject)=>{const req=db.transaction(DB_STORE,'readonly').objectStore(DB_STORE).get(key);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
-async function deleteBlob(key){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+async function putLocalBlob(key,blob){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(blob,key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+async function getLocalBlob(key){const db=await openDB();return new Promise((resolve,reject)=>{const req=db.transaction(DB_STORE,'readonly').objectStore(DB_STORE).get(key);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function deleteLocalBlob(key){const db=await openDB();return new Promise((resolve,reject)=>{const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).delete(key);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})}
+async function putBlob(key,blob){
+  await putLocalBlob(key,blob);
+  if(!cloudConfigured())return;
+  const cfg=dataConfig();const form=new FormData();form.append('action','upload');form.append('appId',cfg.appId);form.append('key',key);form.append('file',blob,key);
+  const headers={};if(cfg.supabaseAnonKey){headers.apikey=cfg.supabaseAnonKey;headers.Authorization=`Bearer ${cfg.supabaseAnonKey}`}
+  const res=await fetch(cfg.dataFunctionUrl,{method:'POST',headers,body:form});let data={};try{data=await res.json()}catch{};if(!res.ok)throw new Error(data.error||`Error ${res.status}`);
+}
+async function getBlob(key){
+  const local=await getLocalBlob(key).catch(()=>null);if(local)return local;
+  if(!cloudConfigured())return null;
+  try{const data=await dataRequest({action:'download',key});const res=await fetch(data.url);if(!res.ok)throw new Error(`Error ${res.status}`);const blob=await res.blob();await putLocalBlob(key,blob);return blob}catch(err){console.error('Cloud file download',err);return null}
+}
+async function deleteBlob(key){
+  await deleteLocalBlob(key).catch(()=>{});
+  if(cloudConfigured())await dataRequest({action:'delete',key}).catch(err=>console.error('Cloud file delete',err));
+}
 async function loadBlobImage(key,img,fallback){try{const blob=await getBlob(key);if(blob){const url=URL.createObjectURL(blob);img.src=url;img.style.display='block';fallback.style.display='none';applyPhotoCrop(img)}else{img.style.display='none';fallback.style.display='grid'}}catch{}}
 async function handleProfilePhoto(file){if(!file)return;await putBlob('profile-photo',file);state.profile.photoX=50;state.profile.photoY=50;state.profile.photoZoom=1;saveState();await renderHeaderPhoto();renderProfile();toast('Foto d’en Blat actualitzada');setTimeout(openPhotoCrop,120)}
 
@@ -413,4 +484,4 @@ document.getElementById('notificationForm').addEventListener('submit',async e=>{
 
 hydrateIcons();
 if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-renderAll();checkNotifications();
+renderAll();checkNotifications();bootstrapCloudState();

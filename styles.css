@@ -370,3 +370,9 @@ section[data-screen="notificacions"] .notification-help-card,
 section[data-screen="notificacions"] .notification-reminder{
   background-image:none!important;
 }
+
+
+/* Ajustos Paula */
+.avatar-button{display:none!important}
+.topbar{justify-content:flex-start}
+.hero-card:before,.hero-card:after{display:none!important}
