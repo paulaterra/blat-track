@@ -10,7 +10,7 @@
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="icon" href="icons/icon-192.png" />
-  <link rel="stylesheet" href="styles.css?v=19" />
+  <link rel="stylesheet" href="styles.css?v=20" />
   <title>Blat al dia</title>
 </head>
 <body>
@@ -302,8 +302,8 @@
   </dialog>
 
   <div id="toast" class="toast" role="status"></div>
-  <script src="config.js?v=17"></script>
-  <script src="app.js?v=18"></script>
+  <script src="config.js?v=20"></script>
+  <script src="app.js?v=20"></script>
 
   <dialog id="photoCropDialog" class="modal">
     <form method="dialog" id="photoCropForm" class="modal-card">
@@ -317,5 +317,14 @@
       <div class="modal-actions"><button type="button" class="secondary-btn" data-action="reset-photo-crop">Centrar</button><span class="spacer"></span><button class="primary-btn" type="submit"><span data-icon="save"></span> Desar enquadrament</button></div>
     </form>
   </dialog>
+
+  <dialog id="guidelineViewDialog" class="modal large-modal guideline-view-dialog">
+    <div class="modal-card guideline-view-card">
+      <div class="modal-head"><div><span class="eyebrow">PAUTA</span><h2 id="guidelineViewTitle">Pauta</h2></div><button class="icon-btn" type="button" data-close aria-label="Tancar"><span data-icon="x"></span></button></div>
+      <div id="guidelineViewBody" class="guideline-view-body"></div>
+      <div class="modal-actions"><span class="spacer"></span><button type="button" class="secondary-btn" id="guidelineViewEdit" data-edit-guideline=""><span data-icon="edit"></span> Editar</button><button type="button" class="primary-btn" data-close>Tancar</button></div>
+    </div>
+  </dialog>
+
 </body>
 </html>

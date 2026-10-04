@@ -429,3 +429,35 @@ section[data-screen="notificacions"] .notification-reminder{
   .hero-visual{width:116px!important}
   .hero-avatar-ring{width:116px!important;height:142px!important}
 }
+
+
+/* Pautes: consulta separada de l'edició */
+.guideline-lines-preview{max-height:58px;overflow:hidden;position:relative;margin-bottom:0}
+.guideline-view-btn{margin-top:14px;width:100%;border:0;border-top:1px solid var(--line);background:transparent;padding:13px 4px 2px;display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:820;color:var(--ink);cursor:pointer}
+.guideline-view-btn svg{width:15px;height:15px}
+.guideline-view-body{display:grid;gap:18px}
+.guideline-detail-section{display:grid;gap:8px;padding:0 2px}
+.guideline-detail-text{font-size:14px;line-height:1.65;color:#3f4348;white-space:normal}
+.guideline-detail-text a{color:#2f6d87;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.guideline-detail-media{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.guideline-detail-file{display:grid;grid-template-columns:88px 1fr;gap:12px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:16px;padding:8px;text-align:left}
+.guideline-detail-file-preview{width:88px;aspect-ratio:1/1;border-radius:12px;background:#f4f5f6;display:grid;place-items:center;overflow:hidden;color:#646b72}
+.guideline-detail-file-preview img{width:100%;height:100%;object-fit:cover}
+.guideline-detail-file strong{display:block;font-size:12px}.guideline-detail-file span{display:block;margin-top:4px;color:var(--muted);font-size:11px;line-height:1.4}
+@media (max-width:640px){.guideline-detail-media{grid-template-columns:1fr}.guideline-detail-file{grid-template-columns:74px 1fr}.guideline-detail-file-preview{width:74px}}
+
+
+/* v21 — Pautes completes directament a cada fitxa */
+section[data-screen="pautes"] .guidelines-grid{grid-template-columns:1fr!important;align-items:start}
+.guideline-card-full{padding:20px!important}
+.guideline-card-full .guideline-top{align-items:flex-start;margin-bottom:4px}
+.guideline-card-full .guideline-top h4{font-size:18px;margin-bottom:0}
+.guideline-card-section{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.guideline-section-label{display:block;margin-bottom:7px;font-size:9px;line-height:1.2;letter-spacing:.14em;text-transform:uppercase;font-weight:850;color:var(--muted)}
+.guideline-card-text{font-size:13px;line-height:1.6;color:#3f4348;overflow-wrap:anywhere}
+.guideline-card-text a{color:#2f6d87;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.guideline-card-files .guideline-media-grid{margin-top:8px}
+.guideline-card-full .card-menu{flex:0 0 auto}
+.guideline-card-full .guideline-media{cursor:pointer}
+@media (min-width:900px){section[data-screen="pautes"] .guidelines-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media (min-width:1180px){section[data-screen="pautes"] .guidelines-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}

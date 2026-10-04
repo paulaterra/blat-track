@@ -141,6 +141,10 @@ async function bootstrapCloudState(){
 
 function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function lines(s=''){return esc(s).split(/\n+/).filter(Boolean)}
+function linkify(s=''){
+  const safe=esc(s);
+  return safe.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>').replace(/\n/g,'<br>');
+}
 function formatDate(iso){if(!iso)return'Sense data';return new Intl.DateTimeFormat('ca-ES',{day:'numeric',month:'short',year:'numeric'}).format(new Date(iso.slice(0,10)+'T12:00:00'))}
 function daysBetween(a,b){return Math.ceil((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000)}
 function addInterval(dateStr,value,unit){
@@ -218,12 +222,51 @@ function trackingCard(item){return`<div class="card tracking-card tone-${formatT
 function renderGuidelines(){
   const list=document.getElementById('guidelinesList');
   list.innerHTML=state.guidelines.length?state.guidelines.map(g=>{
-    const instructions=lines(g.instructions||'');
     const tone=g.tone||['peach','mint','lilac','sky','yellow','rose'][state.guidelines.indexOf(g)%6];
-    return `<article class="card guideline-card tone-${tone}"><div class="guideline-top"><div><span class="pill">Pauta habitual</span><h4 style="margin-top:8px">${esc(g.title||'Pauta sense títol')}</h4>${g.when?`<p>${esc(g.when)}</p>`:''}</div><button class="card-menu" data-edit-guideline="${g.id}" aria-label="Editar pauta">${icon('more')}</button></div>${instructions.length?`<ul class="guideline-lines">${instructions.map(l=>`<li>${l}</li>`).join('')}</ul>`:''}${g.products?`<div class="inline-tags"><span class="pill">${esc(g.products)}</span></div>`:''}${g.notes?`<p style="margin-top:10px">${esc(g.notes)}</p>`:''}${g.attachments?.length?`<div class="guideline-media-grid">${g.attachments.map(a=>`<button class="guideline-media" data-open-guideline-file="${a.id}"><div class="guideline-media-preview" data-guideline-preview="${a.id}">${icon(fileIcon(a.type))}</div><div class="guideline-media-copy"><strong>${esc(a.name)}</strong>${a.description?`<span>${esc(a.description)}</span>`:''}</div></button>`).join('')}</div>`:''}</article>`
+    return `<article class="card guideline-card guideline-card-full tone-${tone}">
+      <div class="guideline-top">
+        <div><span class="pill">Pauta habitual</span><h4 style="margin-top:8px">${esc(g.title||'Pauta sense títol')}</h4></div>
+        <button class="card-menu" data-edit-guideline="${g.id}" aria-label="Editar pauta">${icon('edit',17)}</button>
+      </div>
+      ${g.when?`<section class="guideline-card-section"><span class="guideline-section-label">Quan la faig servir?</span><div class="guideline-card-text">${linkify(g.when)}</div></section>`:''}
+      ${g.instructions?`<section class="guideline-card-section"><span class="guideline-section-label">Indicacions</span><div class="guideline-card-text">${linkify(g.instructions)}</div></section>`:''}
+      ${g.products?`<section class="guideline-card-section"><span class="guideline-section-label">Productes / menjar</span><div class="guideline-card-text">${linkify(g.products)}</div></section>`:''}
+      ${g.notes?`<section class="guideline-card-section"><span class="guideline-section-label">Notes</span><div class="guideline-card-text">${linkify(g.notes)}</div></section>`:''}
+      ${(g.attachments||[]).length?`<section class="guideline-card-section guideline-card-files"><span class="guideline-section-label">Fotos i documents</span><div class="guideline-media-grid">${g.attachments.map(a=>`<button class="guideline-media" data-open-guideline-file="${a.id}"><div class="guideline-media-preview" data-guideline-preview="${a.id}">${icon(fileIcon(a.type))}</div><div class="guideline-media-copy"><strong>${esc(a.name)}</strong>${a.description?`<span>${esc(a.description)}</span>`:''}</div></button>`).join('')}</div></section>`:''}
+    </article>`
   }).join(''):`<div class="empty"><strong>Cap pauta encara</strong>Afegeix aquelles indicacions que et dona el veterinari i vols recordar.</div>`;
   hydrateGuidelinePreviews();
 }
+
+function guidelineDetailSection(label,content){
+  if(!content)return'';
+  return `<section class="guideline-detail-section"><span class="eyebrow">${label}</span><div class="guideline-detail-text">${linkify(content)}</div></section>`;
+}
+
+async function openGuidelineView(item){
+  if(!item)return;
+  const dlg=document.getElementById('guidelineViewDialog');
+  document.getElementById('guidelineViewTitle').textContent=item.title||'Pauta';
+  const body=document.getElementById('guidelineViewBody');
+  body.innerHTML=`
+    ${item.when?guidelineDetailSection('QUAN LA FAIG SERVIR?',item.when):''}
+    ${item.instructions?guidelineDetailSection('INDICACIONS',item.instructions):''}
+    ${item.products?guidelineDetailSection('PRODUCTES / MENJAR',item.products):''}
+    ${item.notes?guidelineDetailSection('NOTES',item.notes):''}
+    ${(item.attachments||[]).length?`<section class="guideline-detail-section"><span class="eyebrow">FOTOS I DOCUMENTS</span><div class="guideline-detail-media">${item.attachments.map(a=>`<button class="guideline-detail-file" data-open-guideline-file="${a.id}"><div class="guideline-detail-file-preview" data-guideline-view-preview="${a.id}">${icon(fileIcon(a.type))}</div><div><strong>${esc(a.name)}</strong>${a.description?`<span>${esc(a.description)}</span>`:''}</div></button>`).join('')}</div></section>`:''}
+  `;
+  document.getElementById('guidelineViewEdit').dataset.editGuideline=item.id;
+  dlg.showModal();
+  const previews=[...body.querySelectorAll('[data-guideline-view-preview]')];
+  await Promise.all(previews.map(async node=>{
+    const id=node.dataset.guidelineViewPreview;
+    const meta=(item.attachments||[]).find(a=>a.id===id);
+    if(!meta?.type?.startsWith('image/'))return;
+    const blob=await getBlob(id);if(!blob)return;
+    const url=URL.createObjectURL(blob);node.innerHTML=`<img src="${url}" alt="">`;setTimeout(()=>URL.revokeObjectURL(url),120000);
+  }));
+}
+
 async function hydrateGuidelinePreviews(){
   const nodes=[...document.querySelectorAll('[data-guideline-preview]')];
   await Promise.all(nodes.map(async node=>{const id=node.dataset.guidelinePreview;const meta=state.guidelines.flatMap(g=>g.attachments||[]).find(a=>a.id===id);if(!meta||!meta.type?.startsWith('image/'))return;const blob=await getBlob(id);if(!blob)return;const url=URL.createObjectURL(blob);node.innerHTML=`<img src="${url}" alt="">`;setTimeout(()=>URL.revokeObjectURL(url),120000)}));
@@ -438,7 +481,8 @@ document.addEventListener('click',async e=>{
   if(e.target.closest('[data-action="test-email"]'))return testNotificationChannel('email');
   if(e.target.closest('[data-action="test-ntfy"]'))return testNotificationChannel('ntfy');
   const et=e.target.closest('[data-edit-tracking]');if(et)return openTracking(state.tracking.find(x=>x.id===et.dataset.editTracking));
-  const eg=e.target.closest('[data-edit-guideline]');if(eg)return openGuideline(state.guidelines.find(x=>x.id===eg.dataset.editGuideline));
+  const vg=e.target.closest('[data-view-guideline]');if(vg)return openGuidelineView(state.guidelines.find(x=>x.id===vg.dataset.viewGuideline));
+  const eg=e.target.closest('[data-edit-guideline]');if(eg){document.getElementById('guidelineViewDialog')?.close();return openGuideline(state.guidelines.find(x=>x.id===eg.dataset.editGuideline))}
   const ej=e.target.closest('[data-edit-journal]');if(ej)return openJournal(state.journal.find(x=>x.id===ej.dataset.editJournal));
   const done=e.target.closest('[data-done-tracking]');if(done)return markDone(done.dataset.doneTracking);
   const tf=e.target.closest('[data-track-filter]');if(tf){trackingFilter=tf.dataset.trackFilter;renderTracking();return}
