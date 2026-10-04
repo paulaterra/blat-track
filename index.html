@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f4f5f6" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Blat al dia" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Blat al dia</title>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <button class="brand" data-go="inici" aria-label="Anar a inici">
+        <span class="brand-mark" data-icon="paw" aria-hidden="true"></span>
+        <span><strong>Blat al dia</strong><small>Salut i seguiment</small></span>
+      </button>
+
+      <nav class="side-nav" aria-label="Navegació principal">
+        <button class="side-item active" data-nav="inici"><span data-icon="home"></span><span>Inici</span></button>
+        <button class="side-item" data-nav="seguiment"><span data-icon="calendar"></span><span>Seguiment</span></button>
+        <button class="side-item" data-nav="pautes"><span data-icon="clipboard"></span><span>Pautes</span></button>
+        <button class="side-item" data-nav="quadern"><span data-icon="notebook"></span><span>Quadern</span></button>
+        <button class="side-item" data-nav="documents"><span data-icon="folder"></span><span>Documents</span></button>
+        <button class="side-item" data-nav="notificacions"><span data-icon="bell"></span><span>Notificacions</span></button>
+        <button class="side-item" data-nav="perfil"><span data-icon="paw"></span><span>Blat</span></button>
+      </nav>
+
+      <div class="sidebar-profile">
+        <button class="sidebar-profile-btn" data-go="perfil">
+          <span class="sidebar-avatar-wrap"><img id="sidebarAvatar" alt="Foto d'en Blat" /><span id="sidebarAvatarFallback" data-icon="paw"></span></span>
+          <span><strong id="sidebarDogName">Blat</strong><small id="sidebarDogMeta">Golden Retriever</small></span>
+          <span data-icon="chevron-right"></span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="app-content">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">BLAT AL DIA</div>
+          <h1 id="screenTitle">Inici</h1>
+        </div>
+        <button class="avatar-button" data-go="perfil" aria-label="Obrir perfil">
+          <img id="headerAvatar" alt="Foto d'en Blat" />
+          <span id="avatarFallback" data-icon="paw"></span>
+        </button>
+      </header>
+
+      <main id="appMain">
+        <section class="screen active" data-screen="inici">
+          <div class="home-grid">
+            <div class="hero-card">
+              <div class="hero-copy">
+                <span class="eyebrow">TOT SOTA CONTROL</span>
+                <h2>La salut d'en Blat, clara i sempre a mà.</h2>
+                <p>Recordatoris, pautes, historial i documents en una sola app.</p>
+                <div class="hero-actions">
+                  <button class="primary-btn" data-quick="tracking"><span data-icon="plus"></span> Afegir seguiment</button>
+                  <button class="secondary-btn" data-quick="note"><span data-icon="edit"></span> Anotació</button>
+                </div>
+              </div>
+              <div class="hero-visual">
+                <div class="hero-avatar-ring">
+                  <img id="heroAvatar" alt="Foto d'en Blat" />
+                  <span id="heroAvatarFallback" data-icon="paw"></span>
+                </div>
+                <span class="hero-name">Blat</span>
+              </div>
+            </div>
+
+            <div class="summary-grid">
+              <button class="summary-card" data-go="seguiment"><span class="summary-icon" data-icon="bell"></span><span><strong id="summaryUpcoming">0</strong><small>avisos pròxims</small></span><span data-icon="chevron-right"></span></button>
+              <button class="summary-card" data-go="pautes"><span class="summary-icon" data-icon="clipboard"></span><span><strong id="summaryGuidelines">0</strong><small>pautes guardades</small></span><span data-icon="chevron-right"></span></button>
+              <button class="summary-card" data-go="quadern"><span class="summary-icon" data-icon="notebook"></span><span><strong id="summaryJournal">0</strong><small>registres de salut</small></span><span data-icon="chevron-right"></span></button>
+              <button class="summary-card" data-go="documents"><span class="summary-icon" data-icon="file"></span><span><strong id="summaryDocuments">0</strong><small>documents</small></span><span data-icon="chevron-right"></span></button>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="section-head">
+                <div><span class="eyebrow">PRÒXIMAMENT</span><h3>Pròxims avisos</h3></div>
+                <button class="text-btn" data-go="seguiment">Veure tots <span data-icon="arrow-right"></span></button>
+              </div>
+              <div id="upcomingList" class="stack"></div>
+            </section>
+
+            <section class="panel">
+              <div class="section-head">
+                <div><span class="eyebrow">ÚLTIMAMENT</span><h3>Quadern de salut</h3></div>
+                <button class="text-btn" data-go="quadern">Obrir <span data-icon="arrow-right"></span></button>
+              </div>
+              <div id="recentJournal" class="stack"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="seguiment">
+          <div class="page-heading">
+            <div><span class="eyebrow">RECORDATORIS</span><h2>Seguiment</h2><p>Afegeix qualsevol vacuna, medicació, desparasitació o cura i decideix quan t'ha d'avisar.</p></div>
+            <button class="primary-btn" data-action="add-tracking"><span data-icon="plus"></span> Nou seguiment</button>
+          </div>
+          <div class="filter-row" id="trackingFilters"></div>
+          <div id="trackingGroups" class="tracking-groups"></div>
+        </section>
+
+        <section class="screen" data-screen="pautes">
+          <div class="page-heading">
+            <div><span class="eyebrow">QUÈ FAIG SI...?</span><h2>Pautes</h2><p>Indicacions, productes, fotos i documents que vols tenir sempre a mà.</p></div>
+            <button class="primary-btn" data-action="add-guideline"><span data-icon="plus"></span> Nova pauta</button>
+          </div>
+          <div id="guidelinesList" class="guidelines-grid"></div>
+        </section>
+
+        <section class="screen" data-screen="quadern">
+          <div class="page-heading">
+            <div><span class="eyebrow">HISTORIAL</span><h2>Quadern</h2><p>Tot el que li ha passat a en Blat, en ordre cronològic.</p></div>
+            <button class="primary-btn" data-action="add-journal"><span data-icon="plus"></span> Nova anotació</button>
+          </div>
+          <div id="journalTimeline" class="timeline"></div>
+        </section>
+
+        <section class="screen" data-screen="documents">
+          <div class="page-heading">
+            <div><span class="eyebrow">ARXIU</span><h2>Documents</h2><p>Carnet de vacunació, analítiques, receptes, informes o qualsevol altre arxiu d'en Blat.</p></div>
+            <label class="primary-btn compact" for="documentInput"><span data-icon="upload"></span> Pujar arxius</label>
+            <input id="documentInput" type="file" multiple hidden />
+          </div>
+          <div class="filter-row" id="documentFilters"></div>
+          <div id="documentsList" class="documents-grid"></div>
+        </section>
+
+        <section class="screen" data-screen="notificacions">
+          <div class="page-heading">
+            <div><span class="eyebrow">AVISOS</span><h2>Notificacions</h2><p>Configura com vols rebre els recordatoris d'en Blat: per correu, per ntfy al mòbil o pels dos canals.</p></div>
+            <button class="primary-btn" data-action="sync-notifications"><span data-icon="sync"></span> Sincronitzar avisos</button>
+          </div>
+
+          <div class="notifications-layout">
+            <form id="notificationForm" class="form-card notification-form">
+              <div class="notification-form-head">
+                <div class="notification-big-icon"><span data-icon="bell"></span></div>
+                <div><span class="eyebrow">CANALS</span><h3>Com vols que t'avisi?</h3><p>Els avisos utilitzen la configuració de cada seguiment: dies abans i el mateix dia.</p></div>
+              </div>
+
+              <div class="channel-card email-channel">
+                <label class="channel-toggle"><span class="channel-icon" data-icon="mail"></span><span><strong>Correu electrònic</strong><small>Rep un email quan toqui un recordatori.</small></span><input name="emailEnabled" type="checkbox" /></label>
+                <label>Adreça de correu<input name="email" type="email" placeholder="nom@correu.com" /></label>
+                <button type="button" class="secondary-btn compact" data-action="test-email"><span data-icon="send"></span> Enviar email de prova</button>
+              </div>
+
+              <div class="channel-card ntfy-channel">
+                <label class="channel-toggle"><span class="channel-icon" data-icon="smartphone"></span><span><strong>ntfy al mòbil</strong><small>Notificació push encara que no tinguis Blat al dia obert.</small></span><input name="ntfyEnabled" type="checkbox" /></label>
+                <div class="form-grid mini-grid">
+                  <label>Servidor ntfy<input name="ntfyServer" placeholder="https://ntfy.sh" /></label>
+                  <label>Topic<input name="ntfyTopic" placeholder="blat-alerts-..." /></label>
+                </div>
+                <button type="button" class="secondary-btn compact" data-action="test-ntfy"><span data-icon="send"></span> Enviar ntfy de prova</button>
+              </div>
+
+              <div class="notification-actions">
+                <button class="primary-btn" type="submit"><span data-icon="save"></span> Desar notificacions</button>
+                <span id="notificationBackendStatus" class="backend-status"></span>
+              </div>
+            </form>
+
+            <div class="notification-side">
+              <section class="panel notification-info-card">
+                <span class="eyebrow">PRÒXIMS AVISOS</span>
+                <h3>Què s'enviarà</h3>
+                <div id="notificationUpcoming" class="stack"></div>
+              </section>
+              <section class="panel notification-help-card">
+                <div class="help-icon" data-icon="info"></div>
+                <div><h3>Automàtics de veritat</h3><p>Quan el backend està connectat, els avisos s'envien encara que la webapp estigui tancada.</p><p class="muted">Email via Resend + push via ntfy.</p></div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="perfil">
+          <div class="profile-hero">
+            <label class="profile-photo-wrap" for="profilePhotoInput">
+              <img id="profilePhoto" alt="Foto d'en Blat" />
+              <span id="profilePhotoFallback" data-icon="paw"></span>
+              <span class="camera-badge"><span data-icon="camera"></span> Canviar</span>
+            </label>
+            <input id="profilePhotoInput" type="file" accept="image/*" hidden />
+            <div class="profile-title"><span class="eyebrow">PERFIL</span><h2 id="profileNameTitle">Blat</h2><p id="profileSummary">Golden Retriever</p><div class="profile-title-actions"><button type="button" class="secondary-btn compact profile-reframe-btn" data-action="crop-profile-photo"><span data-icon="crop"></span> Reenquadrar foto</button></div></div>
+          </div>
+
+            <form id="profileForm" class="form-card profile-form">
+              <label>Nom<input name="name" /></label>
+              <label>Raça<input name="breed" /></label>
+              <label>Data de naixement<input name="birthdate" type="date" /></label>
+              <label>Pes (kg)<input name="weight" type="number" step="0.1" /></label>
+              <label>Microxip<input name="microchip" /></label>
+              <label>Veterinari habitual<input name="vet" /></label>
+              <label class="span-2">Al·lèrgies<textarea name="allergies" rows="3"></textarea></label>
+              <label class="span-2">Medicació habitual<textarea name="regularMedication" rows="3"></textarea></label>
+              <div class="span-2 form-actions"><button class="primary-btn" type="submit"><span data-icon="save"></span> Desar fitxa</button></div>
+            </form>
+        </section>
+      </main>
+    </div>
+
+    <nav class="bottom-nav" aria-label="Navegació principal">
+      <button class="nav-item active" data-nav="inici"><span data-icon="home"></span><small>Inici</small></button>
+      <button class="nav-item" data-nav="seguiment"><span data-icon="calendar"></span><small>Seguiment</small></button>
+      <button class="nav-item" data-nav="pautes"><span data-icon="clipboard"></span><small>Pautes</small></button>
+      <button class="nav-item" data-nav="quadern"><span data-icon="notebook"></span><small>Quadern</small></button>
+      <button class="nav-item" data-nav="documents"><span data-icon="folder"></span><small>Docs</small></button>
+      <button class="nav-item" data-nav="notificacions"><span data-icon="bell"></span><small>Avisos</small></button>
+      <button class="nav-item" data-nav="perfil"><span data-icon="paw"></span><small>Blat</small></button>
+    </nav>
+  </div>
+
+  <dialog id="trackingDialog" class="modal">
+    <form method="dialog" id="trackingForm" class="modal-card">
+      <div class="modal-head"><div><span class="eyebrow">SEGUIMENT</span><h2 id="trackingModalTitle">Afegir</h2></div><button class="icon-btn" value="cancel" aria-label="Tancar"><span data-icon="x"></span></button></div>
+      <input type="hidden" name="id" />
+      <div class="form-grid">
+        <label class="span-2">Nom<input name="name" placeholder="Ex. Milbemax, Bravecto, vacuna ràbia..." /></label>
+        <label>Categoria<select name="category"><option>Vacuna</option><option>Desparasitació</option><option>Medicació</option><option>Higiene</option><option>Revisió</option><option>Altres</option></select></label>
+        <label>Format<select name="format"><option>Vacuna</option><option>Pastilla</option><option>Pipeta</option><option>Crema</option><option>Xampú</option><option>Aliment</option><option>Injecció</option><option>Altres</option></select></label>
+        <label class="span-2">Tipus / per a què<input name="subtype" placeholder="Ex. Ràbia, desparasitació interna, puces i paparres..." /></label>
+        <label>Última administració<input name="lastDate" type="date" /></label>
+        <label>Pròxima data<input name="nextDate" type="date" /><small class="field-help">Es calcula automàticament segons l’última administració i la freqüència, però la pots editar.</small></label>
+        <label>Repetir cada<input name="intervalValue" type="number" min="1" placeholder="3" /></label>
+        <label>Unitat<select name="intervalUnit"><option value="days">dies</option><option value="weeks">setmanes</option><option value="months" selected>mesos</option><option value="years">anys</option></select></label>
+        <label>Avisar abans (dies)<input name="notifyBefore" type="number" min="0" value="15" /></label>
+        <label class="switch-label"><input name="notifySameDay" type="checkbox" checked /> <span>Avisar el mateix dia</span></label>
+        <label class="span-2">Notes<textarea name="notes" rows="3" placeholder="Dosificació, on el compres, indicacions..."></textarea></label>
+      </div>
+      <div class="modal-actions"><button type="button" class="danger-btn hidden" data-action="delete-tracking"><span data-icon="trash"></span> Eliminar</button><span class="spacer"></span><button type="button" class="ghost-btn" data-close>Cancel·lar</button><button type="submit" class="primary-btn"><span data-icon="save"></span> Desar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="guidelineDialog" class="modal large-modal">
+    <form method="dialog" id="guidelineForm" class="modal-card">
+      <div class="modal-head"><div><span class="eyebrow">PAUTA</span><h2 id="guidelineModalTitle">Nova pauta</h2></div><button class="icon-btn" value="cancel" aria-label="Tancar"><span data-icon="x"></span></button></div>
+      <input type="hidden" name="id" />
+      <div class="form-grid">
+        <label class="span-2">Títol<input name="title" placeholder="Ex. Problemes de pell" /></label>
+        <label class="span-2">Quan la faig servir?<input name="when" placeholder="Ex. Quan té una ferida o zona irritada" /></label>
+        <label class="span-2">Indicacions<textarea name="instructions" rows="6" placeholder="Ex. Si està infectat → Crema X&#10;Si només té ferida → Crema Y"></textarea></label>
+        <label class="span-2">Productes / menjar<textarea name="products" rows="3" placeholder="Ex. Crema X, menjar gastrointestinal..."></textarea></label>
+        <label class="span-2">Notes<textarea name="notes" rows="3"></textarea></label>
+      </div>
+
+      <div class="attachment-editor">
+        <div class="attachment-editor-head">
+          <div><span class="eyebrow">FOTOS I DOCUMENTS</span><h3>Adjunts de la pauta</h3><p>Pots afegir-ne tants com vulguis i descriure què és cada fitxer.</p></div>
+          <label class="secondary-btn compact" for="guidelineFiles"><span data-icon="paperclip"></span> Afegir adjunts</label>
+          <input id="guidelineFiles" type="file" multiple hidden />
+        </div>
+        <div id="guidelineAttachmentEditor" class="attachment-editor-list"></div>
+      </div>
+
+      <div class="modal-actions"><button type="button" class="danger-btn hidden" data-action="delete-guideline"><span data-icon="trash"></span> Eliminar pauta</button><span class="spacer"></span><button type="button" class="ghost-btn" data-close>Cancel·lar</button><button type="submit" class="primary-btn"><span data-icon="save"></span> Desar pauta</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="journalDialog" class="modal large-modal">
+    <form method="dialog" id="journalForm" class="modal-card">
+      <div class="modal-head"><div><span class="eyebrow">QUADERN</span><h2 id="journalModalTitle">Nova anotació</h2></div><button class="icon-btn" value="cancel"><span data-icon="x"></span></button></div>
+      <input type="hidden" name="id" />
+      <div class="form-grid">
+        <label>Data<input name="date" type="date" /></label>
+        <label>Tipus<select name="type"><option>Salut</option><option>Visita veterinari</option><option>Millora</option><option>Medicació</option><option>Alimentació</option><option>Altres</option></select></label>
+        <label class="span-2">Títol<input name="title" placeholder="Ex. Diarrea, pell irritada..." /></label>
+        <label class="span-2">Anotació<textarea name="notes" rows="5"></textarea></label>
+      </div>
+
+      <div class="attachment-editor">
+        <div class="attachment-editor-head">
+          <div><span class="eyebrow">FOTOS I DOCUMENTS</span><h3>Adjunts de l'anotació</h3><p>Afegeix fotos de l'evolució, receptes o qualsevol document relacionat.</p></div>
+          <label class="secondary-btn compact" for="journalFiles"><span data-icon="camera"></span> Afegir fotos o arxius</label>
+          <input id="journalFiles" type="file" accept="image/*,.pdf,.doc,.docx" multiple hidden />
+        </div>
+        <div id="journalAttachmentEditor" class="attachment-editor-list"></div>
+      </div>
+
+      <div class="modal-actions"><button type="button" class="danger-btn hidden" data-action="delete-journal"><span data-icon="trash"></span> Eliminar</button><span class="spacer"></span><button type="button" class="ghost-btn" data-close>Cancel·lar</button><button type="submit" class="primary-btn"><span data-icon="save"></span> Desar</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="docCategoryDialog" class="modal small-modal">
+    <form method="dialog" id="docCategoryForm" class="modal-card">
+      <div class="modal-head"><div><span class="eyebrow">DOCUMENT</span><h2>Classifica l'arxiu</h2></div><button class="icon-btn" value="cancel"><span data-icon="x"></span></button></div>
+      <p id="pendingDocName" class="muted"></p>
+      <label>Categoria<select name="category"><option>Carnet de vacunació</option><option>Analítiques</option><option>Receptes</option><option>Informes</option><option>Altres</option></select></label>
+      <label>Descripció<input name="note" placeholder="Ex. Analítica anual 2026" /></label>
+      <div class="modal-actions"><span class="spacer"></span><button type="button" class="ghost-btn" data-close>Cancel·lar</button><button type="submit" class="primary-btn"><span data-icon="upload"></span> Pujar</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+
+  <dialog id="photoCropDialog" class="modal">
+    <form method="dialog" id="photoCropForm" class="modal-card">
+      <div class="modal-head"><div><span class="eyebrow">FOTO D'EN BLAT</span><h2>Reenquadrar foto</h2></div><button class="icon-btn" value="cancel" aria-label="Tancar"><span data-icon="x"></span></button></div>
+      <div class="photo-crop-preview"><img id="photoCropPreview" alt="Previsualització de la foto d'en Blat" /></div>
+      <div class="crop-controls">
+        <div class="crop-control"><label for="cropX">Horitzontal</label><input id="cropX" name="cropX" type="range" min="0" max="100" step="1" /><output id="cropXOut">50%</output></div>
+        <div class="crop-control"><label for="cropY">Vertical</label><input id="cropY" name="cropY" type="range" min="0" max="100" step="1" /><output id="cropYOut">50%</output></div>
+        <div class="crop-control"><label for="cropZoom">Zoom</label><input id="cropZoom" name="cropZoom" type="range" min="1" max="2.2" step="0.05" /><output id="cropZoomOut">1.00×</output></div>
+      </div>
+      <div class="modal-actions"><button type="button" class="secondary-btn" data-action="reset-photo-crop">Centrar</button><span class="spacer"></span><button class="primary-btn" type="submit"><span data-icon="save"></span> Desar enquadrament</button></div>
+    </form>
+  </dialog>
+</body>
+</html>
