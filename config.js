@@ -1,10 +1,8 @@
 /*
-  Configuració opcional per activar avisos automàtics amb Supabase.
-  Després de desplegar la funció `blat-notifications`, enganxa aquí la URL
-  i la clau anon del projecte. Sense això, la webapp continua funcionant
-  normalment i ntfy es pot provar directament des de la pantalla d'Avisos.
+  Configuració de Blat Track per connectar les notificacions amb Supabase.
+  La publishable key es pot utilitzar al navegador.
 */
 window.BLAT_CONFIG = {
-  notificationFunctionUrl: '',
-  supabaseAnonKey: ''
+  notificationFunctionUrl: 'https://wofcnpdflcjfriswikll.supabase.co/functions/v1/blat-notifications',
+  supabaseAnonKey: 'sb_publishable_ptXSlRndYyx9NNSpr3kJ-w_QEr1Vfal'
 };
